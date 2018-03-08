@@ -1,0 +1,18 @@
+package: sample-extension-apiserver
+import:
+- package: github.com/appscode/go
+  subpackages:
+  - log/golog
+- package: github.com/appscode/kubed
+  version: 0.6.0-rc.0
+  subpackages:
+  - pkg/cmds
+- package: github.com/mitchellh/go-homedir
+- package: github.com/spf13/cobra
+  version: v0.0.1
+- package: github.com/spf13/viper
+  version: v1.0.0
+- package: k8s.io/client-go
+  version: v6.0.0
+  subpackages:
+  - kubernetes/fake

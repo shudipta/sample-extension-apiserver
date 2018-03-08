@@ -14,8 +14,22 @@
 
 package main
 
-import "sample-extension-apiserver/cmd"
+import (
+	"sample-extension-apiserver/cmd"
+	"os"
+	"runtime"
+
+	logs "github.com/appscode/go/log/golog"
+	_ "k8s.io/client-go/kubernetes/fake"
+)
 
 func main() {
+	logs.InitLogs()
+	defer logs.FlushLogs()
+
+	if len(os.Getenv("GOMAXPROCS")) == 0 {
+		runtime.GOMAXPROCS(runtime.NumCPU())
+	}
+
 	cmd.Execute()
 }
