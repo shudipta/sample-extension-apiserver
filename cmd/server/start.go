@@ -89,6 +89,7 @@ func NewOptions(out, errOut io.Writer) *ServerOptions {
 		StdErr:             errOut,
 	}
 	opt.RecommendedOptions.Etcd = nil
+	opt.RecommendedOptions.SecureServing.BindPort = 8443
 
 	return opt
 }

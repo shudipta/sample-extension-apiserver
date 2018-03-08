@@ -3,7 +3,7 @@ package apiserver
 import (
 	"sample-extension-apiserver/apis/somethingcontroller/install"
 	api "sample-extension-apiserver/apis/somethingcontroller/v1alpha1"
-	"sample-extension-apiserver/pkg/operator"
+	//"sample-extension-apiserver/pkg/operator"
 	"k8s.io/apimachinery/pkg/apimachinery/announced"
 	"k8s.io/apimachinery/pkg/apimachinery/registered"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -42,7 +42,7 @@ func init() {
 }
 type Config struct {
 	GenericConfig  *genericapiserver.RecommendedConfig
-	OperatorConfig operator.OperatorConfig
+	//OperatorConfig operator.OperatorConfig
 	ExtraConfig    ExtraConfig
 }
 
@@ -54,17 +54,17 @@ type ExtraConfig struct {
 // ExtServer contains state for a Kubernetes cluster master/api server.
 type ExtServer struct {
 	GenericAPIServer *genericapiserver.GenericAPIServer
-	Operator         *operator.Operator
+	//Operator         *operator.Operator
 }
 
 func (op *ExtServer) Run(stopCh <-chan struct{}) error {
-	go op.Operator.Run(stopCh)
+	//go op.Operator.Run(stopCh)
 	return op.GenericAPIServer.PrepareRun().Run(stopCh)
 }
 
 type completedConfig struct {
 	GenericConfig  genericapiserver.CompletedConfig
-	OperatorConfig *operator.OperatorConfig
+	//OperatorConfig *operator.OperatorConfig
 	ExtraConfig    *ExtraConfig
 }
 
@@ -77,7 +77,7 @@ type CompletedConfig struct {
 func (c *Config) Complete() CompletedConfig {
 	completedCfg := completedConfig{
 		c.GenericConfig.Complete(),
-		&c.OperatorConfig,
+		//&c.OperatorConfig,
 		&c.ExtraConfig,
 	}
 
@@ -95,14 +95,14 @@ func (c completedConfig) New() (*ExtServer, error) {
 	if err != nil {
 		return nil, err
 	}
-	operator, err := c.OperatorConfig.New()
+	//operator, err := c.OperatorConfig.New()
 	if err != nil {
 		return nil, err
 	}
 
 	s := &ExtServer{
 		GenericAPIServer: genericServer,
-		Operator:         operator,
+		//Operator:         operator,
 	}
 
 	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(

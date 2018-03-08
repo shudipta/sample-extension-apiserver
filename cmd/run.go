@@ -35,7 +35,7 @@ var runCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 		if err := options.Run(stopCh); err != nil {
-			log.Fatalf("error in starting extension apiserver:", err)
+			log.Fatalln("error in starting extension apiserver:", err)
 		}
 	},
 }

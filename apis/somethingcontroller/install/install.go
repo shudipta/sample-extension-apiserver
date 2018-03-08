@@ -27,7 +27,7 @@ func Install(groupFactoryRegistry announced.APIGroupFactoryRegistry, registry *r
 		&announced.GroupMetaFactoryArgs{
 			GroupName:                  somethingcontroller.GroupName,
 			VersionPreferenceOrder:     []string{v1alpha1.SchemeGroupVersion.Version},
-			AddInternalObjectsToScheme: somethingcontroller.AddToScheme,
+			AddInternalObjectsToScheme: v1alpha1.AddToScheme,
 		},
 		announced.VersionToSchemeFunc{
 			v1alpha1.SchemeGroupVersion.Version: v1alpha1.AddToScheme,
