@@ -1,13 +1,11 @@
 hash: 2455de9aa9dec3469867a8a1aeea272814e57b96c1765a982918cd86d532c3a8
-updated: 2018-03-08T13:16:07.63690869+06:00
+updated: 2018-03-09T16:30:37.352684304+06:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
 - name: github.com/appscode/go
   version: c312c0a1fe0d4988480073287b8633fc5a244647
   subpackages:
-  - context
-  - log
   - log/golog
 - name: github.com/appscode/kubed
   version: 9181f66d1e666280e74cde67448ce1941d0eaba0
@@ -133,8 +131,6 @@ imports:
   version: 7d79101e329e5a3adf994758c578dab82b90c017
 - name: github.com/google/gofuzz
   version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
-- name: github.com/google/uuid
-  version: dec09d789f3dba190787f8b4454c7d3c936fed9e
 - name: github.com/googleapis/gnostic
   version: 0c5108395e2debce0d731cf0287ddf7242066aba
   subpackages:
@@ -381,7 +377,7 @@ imports:
   - third_party/forked/golang/netutil
   - third_party/forked/golang/reflect
 - name: k8s.io/apiserver
-  version: 91e14f394e4796abf5a994a349a222e7081d86b6
+  version: 1270e9f1ad9eaf6127691df90af0836f7e152495
   subpackages:
   - pkg/admission
   - pkg/admission/configuration

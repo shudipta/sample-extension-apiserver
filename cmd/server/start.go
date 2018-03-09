@@ -17,62 +17,16 @@ import (
 	//cs "sample-extension-apiserver/client/clientset/versioned"
 	//kext_cs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
-	"time"
+	//"time"
+	"github.com/spf13/pflag"
+	"github.com/golang/glog"
 )
 
 const defaultEtcdPathPrefix = "/registry/somethingcontroller.kube-ac.com"
 
-
-type OperatorOptions struct {
-	ConfigPath          string
-	OpsAddress          string
-	ControllerNamespace string
-
-	QPS          float32
-	Burst        int
-	ResyncPeriod time.Duration
-}
-
-func NewOperatorOptions() *OperatorOptions {
-	return &OperatorOptions{
-		ConfigPath: "/home/ac/go/src/sample-extension-apiserver/hack/deploy/config.yaml",
-		OpsAddress: ":56790",
-		// ref: https://github.com/kubernetes/ingress-nginx/blob/e4d53786e771cc6bdd55f180674b79f5b692e552/pkg/ingress/controller/launch.go#L252-L259
-		// High enough QPS to fit all expected use cases. QPS=0 is not set here, because client code is overriding it.
-		QPS: 1e6,
-		// High enough Burst to fit all expected use cases. Burst=0 is not set here, because client code is overriding it.
-		Burst:              1e6,
-		ResyncPeriod:       10 * time.Minute,
-	}
-}
-
-//func (s *OperatorOptions) ApplyTo(cfg *operator.OperatorConfig) error {
-//	var err error
-//
-//	cfg.OperatorNamespace = meta.Namespace()
-//	cfg.ClientConfig.QPS = s.QPS
-//	cfg.ClientConfig.Burst = s.Burst
-//	cfg.ResyncPeriod = s.ResyncPeriod
-//
-//	if cfg.KubeClient, err = kubernetes.NewForConfig(cfg.ClientConfig); err != nil {
-//		return err
-//	}
-//	if cfg.CRDClient, err = kext_cs.NewForConfig(cfg.ClientConfig); err != nil {
-//		return err
-//	}
-//	if cfg.ExtServerClient, err = cs.NewForConfig(cfg.ClientConfig); err != nil {
-//		return err
-//	}
-//
-//	cfg.OpsAddress = s.OpsAddress
-//	cfg.ConfigPath = s.ConfigPath
-//
-//	return nil
-//}
-
 type ServerOptions struct {
 	RecommendedOptions *genericoptions.RecommendedOptions
-	OperatorOptions    *OperatorOptions
+	//OperatorOptions    *OperatorOptions
 
 	StdOut                io.Writer
 	StdErr                io.Writer
@@ -88,10 +42,15 @@ func NewOptions(out, errOut io.Writer) *ServerOptions {
 		StdOut:             out,
 		StdErr:             errOut,
 	}
-	opt.RecommendedOptions.Etcd = nil
-	opt.RecommendedOptions.SecureServing.BindPort = 8443
+	//opt.RecommendedOptions.Etcd = nil
+	//opt.RecommendedOptions.SecureServing.BindPort = 8443
 
 	return opt
+}
+
+func (o *ServerOptions) AddFlags(fs *pflag.FlagSet) {
+	o.RecommendedOptions.AddFlags(fs)
+	//o.OperatorOptions.AddFlags(fs)
 }
 
 func (o ServerOptions) Validate(args []string) error {
@@ -126,14 +85,15 @@ func (o *ServerOptions) Config() (*apiserver.Config, error) {
 	config := &apiserver.Config{
 		GenericConfig:  serverConfig,
 		//OperatorConfig: *operatorConfig,
-		ExtraConfig: apiserver.ExtraConfig{
-			ClientConfig:   serverConfig.ClientConfig,
-		},
+		//ExtraConfig: apiserver.ExtraConfig{
+		//	ClientConfig:   serverConfig.ClientConfig,
+		//},
 	}
 	return config, nil
 }
 
 func (o ServerOptions) Run(stopCh <-chan struct{}) error {
+	glog.Infoln("running........")
 	config, err := o.Config()
 	if err != nil {
 		return err
@@ -148,6 +108,10 @@ func (o ServerOptions) Run(stopCh <-chan struct{}) error {
 	//	return nil
 	//})
 
-	//return s.GenericAPIServer.PrepareRun().Run(stopCh)
-	return s.Run(stopCh)
+	if err := s.GenericAPIServer.PrepareRun().Run(stopCh); err != nil {
+		glog.Fatal(err)
+	}
+
+	//return s.Run(stopCh)
+	return nil
 }

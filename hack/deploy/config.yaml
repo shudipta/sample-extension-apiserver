@@ -1,5 +1,63 @@
-apiVersion:
-kind:
+apiVersion: v1
+kind: Secret
 metadata:
-  name:
+  name: secret-apiserver
+  namespace: kube-ac
+  labels:
+    app: foo
+type: kubernetes.io/tls
+data:
+  tls.crt: ${TLS_SERVING_CERT}
+  tls.key: ${TLS_SERVING_KEY}
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-apiserver
+  namespace: kube-ac
 spec:
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    apiserver: "true"
+---
+
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: deploy-apiserver
+  namespace: kube-ac
+  labels:
+    apiserver: "true"
+  initializers:
+    pending: []
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      apiserver: "true"
+  template:
+    metadata:
+      labels:
+        apiserver: "true"
+    spec:
+      containers:
+      - name: etcd
+        image: quay.io/coreos/etcd:v3.2.16
+      - name: sample-extension-apiserver
+        image: shudipta/sample-extension-apiserver:latest
+        command: [ "/sample-extension-apiserver", "run", "--etcd-servers=http://localhost:2379" ]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - mountPath: /etc/apiserver-crt
+          name: secret-apiserver-vol
+      volumes:
+      - name: secret-apiserver-vol
+        secret:
+          defaultMode: 420
+          secretName: secret-apiserver

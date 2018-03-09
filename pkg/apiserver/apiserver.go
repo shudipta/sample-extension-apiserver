@@ -12,8 +12,12 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/version"
 	genericapiserver "k8s.io/apiserver/pkg/server"
-	restclient "k8s.io/client-go/rest"
+	//restclient "k8s.io/client-go/rest"
 	"k8s.io/apiserver/pkg/registry/rest"
+	"github.com/golang/glog"
+
+	something_registry "sample-extension-apiserver/pkg/registry"
+	something_storage "sample-extension-apiserver/pkg/registry/something"
 )
 
 var (
@@ -40,24 +44,25 @@ func init() {
 		&metav1.APIResourceList{},
 	)
 }
+
 type Config struct {
 	GenericConfig  *genericapiserver.RecommendedConfig
 	//OperatorConfig operator.OperatorConfig
-	ExtraConfig    ExtraConfig
+	//ExtraConfig    ExtraConfig
 }
 
-type ExtraConfig struct {
-	//AdmissionHooks []hookapi.AdmissionHook
-	ClientConfig   *restclient.Config
-}
+//type ExtraConfig struct {
+//	//AdmissionHooks []hookapi.AdmissionHook
+//	ClientConfig   *restclient.Config
+//}
 
 // ExtServer contains state for a Kubernetes cluster master/api server.
-type ExtServer struct {
+type ExtensionServer struct {
 	GenericAPIServer *genericapiserver.GenericAPIServer
 	//Operator         *operator.Operator
 }
 
-func (op *ExtServer) Run(stopCh <-chan struct{}) error {
+func (op *ExtensionServer) Run(stopCh <-chan struct{}) error {
 	//go op.Operator.Run(stopCh)
 	return op.GenericAPIServer.PrepareRun().Run(stopCh)
 }
@@ -65,7 +70,7 @@ func (op *ExtServer) Run(stopCh <-chan struct{}) error {
 type completedConfig struct {
 	GenericConfig  genericapiserver.CompletedConfig
 	//OperatorConfig *operator.OperatorConfig
-	ExtraConfig    *ExtraConfig
+	//ExtraConfig    *ExtraConfig
 }
 
 type CompletedConfig struct {
@@ -78,29 +83,30 @@ func (c *Config) Complete() CompletedConfig {
 	completedCfg := completedConfig{
 		c.GenericConfig.Complete(),
 		//&c.OperatorConfig,
-		&c.ExtraConfig,
+		//&c.ExtraConfig,
 	}
 
 	completedCfg.GenericConfig.Version = &version.Info{
 		Major: "1",
-		Minor: "1",
+		Minor: "1", //todo: 0 (may be 0)
 	}
 
 	return CompletedConfig{&completedCfg}
 }
 
 // New returns a new instance of ExtServer from the given config.
-func (c completedConfig) New() (*ExtServer, error) {
+func (c completedConfig) New() (*ExtensionServer, error) {
+	glog.Infoln("new completed config..........")
 	genericServer, err := c.GenericConfig.New("Extension-api-server", genericapiserver.EmptyDelegate) // completion is done in Complete, no need for a second time
 	if err != nil {
 		return nil, err
 	}
 	//operator, err := c.OperatorConfig.New()
-	if err != nil {
-		return nil, err
-	}
+	//if err != nil {
+	//	return nil, err
+	//}
 
-	s := &ExtServer{
+	s := &ExtensionServer{
 		GenericAPIServer: genericServer,
 		//Operator:         operator,
 	}
@@ -112,7 +118,8 @@ func (c completedConfig) New() (*ExtServer, error) {
 	apiGroupInfo.GroupMeta.GroupVersion = api.SchemeGroupVersion
 
 	v1alpha1storage := map[string]rest.Storage{}
-	v1alpha1storage["somethings"] = NewREST()
+	v1alpha1storage["somethings"] = something_registry.
+		RESTInPeace(something_storage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
 	apiGroupInfo.VersionedResourcesStorageMap["v1alpha1"] = v1alpha1storage
 
 	if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {

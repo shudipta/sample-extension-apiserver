@@ -1,0 +1,6 @@
+apiVersion: somethingcontroller.kube-ac.com/v1alpha1
+kind: Something
+metadata:
+  name: stn-demo
+  labels:
+    sample-label: "true"
