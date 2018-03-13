@@ -20,13 +20,15 @@ import (
 	//"time"
 	"github.com/spf13/pflag"
 	"github.com/golang/glog"
+	clientset "sample-extension-apiserver/client/clientset/versioned"
 )
 
-const defaultEtcdPathPrefix = "/registry/somethingcontroller.kube-ac.com"
+const defaultEtcdPathPrefix = "/registry/admission.somethingcontroller.kube-ac.com"
 
 type ServerOptions struct {
 	RecommendedOptions *genericoptions.RecommendedOptions
 	//OperatorOptions    *OperatorOptions
+	SomethingClient clientset.Interface
 
 	StdOut                io.Writer
 	StdErr                io.Writer
@@ -39,6 +41,7 @@ func NewOptions(out, errOut io.Writer) *ServerOptions {
 			apiserver.Codecs.LegacyCodec(api.SchemeGroupVersion),
 		),
 		//OperatorOptions:    NewOperatorOptions(),
+
 		StdOut:             out,
 		StdErr:             errOut,
 	}
@@ -85,15 +88,19 @@ func (o *ServerOptions) Config() (*apiserver.Config, error) {
 	config := &apiserver.Config{
 		GenericConfig:  serverConfig,
 		//OperatorConfig: *operatorConfig,
-		//ExtraConfig: apiserver.ExtraConfig{
-		//	ClientConfig:   serverConfig.ClientConfig,
-		//},
+		ExtraConfig: apiserver.ExtraConfig{
+			//ClientConfig:   serverConfig.ClientConfig,
+			AdmissionHooks: []apiserver.AdmissionHook{
+				&apiserver.SomethingValidationHook{Client: o.SomethingClient},
+				&apiserver.SomethingMutaionHook{},
+			},
+		},
 	}
 	return config, nil
 }
 
-func (o ServerOptions) Run(stopCh <-chan struct{}) error {
-	glog.Infoln("running........")
+func (o ServerOptions) Run(stopCh <-chan struct{}, exampleClient clientset.Interface) error {
+	o.SomethingClient = exampleClient
 	config, err := o.Config()
 	if err != nil {
 		return err

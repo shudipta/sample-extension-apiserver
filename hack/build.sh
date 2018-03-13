@@ -25,7 +25,8 @@ docker push shudipta/sample-extension-apiserver:latest
 #export TLS_SERVING_CERT=$(cat $REPO_ROOT/apiserver.local.config/certificates/apiserver.crt | hack/deploy/onessl base64)
 #export TLS_SERVING_KEY=$(cat $REPO_ROOT/apiserver.local.config/certificates/apiserver.key | hack/deploy/onessl base64)
 
-kubectl apply ns kube-ac
+kubectl create ns kube-ac
+kubectl apply -f hack/deploy/crd.yaml -n kube-ac
 
 kubectl apply -f hack/deploy/sa.yaml -n kube-ac
 
@@ -35,6 +36,7 @@ kubectl apply -f hack/deploy/rb.yaml -n kube-system
 kubectl apply -f hack/deploy/rc.yaml -n kube-ac
 kubectl apply -f hack/deploy/svc.yaml -n kube-ac
 
+kubectl apply -f hack/deploy/admission.yaml --validate=false
 kubectl apply -f hack/deploy/apiservice.yaml
 
 kubectl apply -f hack/deploy/something.yaml

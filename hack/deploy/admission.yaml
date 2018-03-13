@@ -1,0 +1,47 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: validation.somethingcontroller.kube-ac.com
+webhooks:
+- name: validation.somethingcontroller.kube-ac.com
+  clientConfig:
+    service:
+      namespace: default
+      name: kubernetes
+      path: /apis/admission.somethingcontroller.kube-ac.com/v1alpha1/validations
+#    caBundle: ${KUBE_CA}
+  rules:
+  - operations:
+    - CREATE
+    - DELETE
+    apiGroups:
+    - somethingcontroller.kube-ac.com
+    apiVersions:
+    - "*"
+    resources:
+    - "*"
+  failurePolicy: Fail
+---
+
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: mutation.somethingcontroller.kube-ac.com
+webhooks:
+- name: mutation.somethingcontroller.kube-ac.com
+  clientConfig:
+    service:
+      namespace: default
+      name: kubernetes
+      path: /apis/admission.somethingcontroller.kube-ac.com/v1alpha1/mutations
+#    caBundle: ${KUBE_CA}
+  rules:
+  - operations:
+    - CREATE
+    apiGroups:
+    - somethingcontroller.kube-ac.com
+    apiVersions:
+    - "*"
+    resources:
+    - "*"
+  failurePolicy: Fail

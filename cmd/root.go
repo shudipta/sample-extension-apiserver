@@ -23,12 +23,14 @@ import (
 	"sample-extension-apiserver/cmd/server"
 	//"github.com/golang/glog"
 	//"fmt"
+	"flag"
 )
 
 var cfgFile string
 //var stopCh <-chan struct{}
 var options *server.ServerOptions
 var etcd string
+var kubeconfig, masterURL string
 
 func NewRootCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -36,6 +38,21 @@ func NewRootCmd() *cobra.Command {
 		Short:             "sample-extension-apiserver",
 		DisableAutoGenTag: true,
 	}
+
+	cmd.PersistentFlags().AddGoFlagSet(flag.CommandLine)
+	cmd.PersistentFlags().StringVarP(
+		&kubeconfig,
+		"kubeConfigPath",
+		"k",
+		"",
+		"(optional) absolute path to the kubeconfig file",
+	)
+	cmd.PersistentFlags().StringVarP(
+		&masterURL,
+		"masterConfigAddress",
+		"m",
+		"",
+		"The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 
 	stopCh := genericapiserver.SetupSignalHandler()
 	cmd.AddCommand(NewCmdRun(os.Stdout, os.Stderr, stopCh))

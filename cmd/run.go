@@ -18,7 +18,15 @@ import (
 	"github.com/spf13/cobra"
 	"sample-extension-apiserver/cmd/server"
 	"io"
-	//"github.com/golang/glog"
+	"github.com/golang/glog"
+	clientset "sample-extension-apiserver/client/clientset/versioned"
+	"time"
+	kubeinformers "k8s.io/client-go/informers"
+	informers "sample-extension-apiserver/client/informers/externalversions"
+	"sample-extension-apiserver/pkg/controller"
+	"fmt"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/kubernetes"
 )
 
 func NewCmdRun(out, errOut io.Writer, stopCh <-chan struct{}) *cobra.Command {
@@ -28,15 +36,57 @@ func NewCmdRun(out, errOut io.Writer, stopCh <-chan struct{}) *cobra.Command {
 		Short:             "Launch ksd server",
 		DisableAutoGenTag: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Println(">>>>>>>>>>>>> kubeconfigfile: \"", kubeconfig, "\"")
+
+			stopCh := make(chan struct{})
+			defer close(stopCh)
+
+			cfg, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+			fmt.Println("======>")
+			if err != nil {
+				glog.Fatalf("Error building kubeconfig: %s", err.Error())
+			}
+
+			kubeClient, err := kubernetes.NewForConfig(cfg)
+			if err != nil {
+				glog.Fatalf("Error building kubernetes clientset: %s", err.Error())
+			}
+			exampleClient, err := clientset.NewForConfig(cfg)
+			if err != nil {
+				glog.Fatalf("Error building example clientset: %s", err.Error())
+			}
+
+			kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30)
+			exampleInformerFactory := informers.NewSharedInformerFactory(exampleClient, time.Second*30)
+
+			controller := controller.NewController(kubeClient, exampleClient, kubeInformerFactory, exampleInformerFactory)
+			//go controller.Run(2, stopCh)
+
+			go kubeInformerFactory.Start(stopCh)
+			go exampleInformerFactory.Start(stopCh)
+
+			go func() {
+				glog.Infoln("starting controller........")
+				if err = controller.Run(2, stopCh); err != nil {
+					glog.Fatalf("Error running controller: %s", err.Error())
+				}
+			}()
+
+
+
 			if err := opt.Complete(); err != nil {
 				return err
 			}
 			if err := opt.Validate(args); err != nil {
 				return err
 			}
-			if err := opt.Run(stopCh); err != nil {
-				return err
-			}
+			go func() error {
+				glog.Infoln("starting apiserver........")
+				if err := opt.Run(stopCh, exampleClient); err != nil {
+					return err
+				}
+				return  nil
+			}()
 
 			return nil
 		},

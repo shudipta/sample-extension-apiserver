@@ -19,6 +19,6 @@ spec:
       - name: sample-extension-apiserver
         image: shudipta/sample-extension-apiserver:latest
         imagePullPolicy: Always
-        command: ["/sample-extension-apiserver", "run", "--etcd-servers=http://localhost:2379" ]
+        command: ["/sample-extension-apiserver", "run", "--etcd-servers=http://localhost:2379"]
       - name: etcd
         image: quay.io/coreos/etcd:v3.2.16
