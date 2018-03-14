@@ -44,13 +44,14 @@ spec:
       labels:
         apiserver: "true"
     spec:
-      serviceAccountName: sa-apiserver
+#      serviceAccountName: sa-apiserver
       containers:
       - name: etcd
         image: quay.io/coreos/etcd:v3.2.16
       - name: sample-extension-apiserver
         image: shudipta/sample-extension-apiserver:latest
-        command: [ "/sample-extension-apiserver", "run", "--etcd-servers=http://localhost:2379" ]
+        #, "--etcd-servers=http://localhost:2379"
+        command: [ "/sample-extension-apiserver", "run", "--etcd-servers=http://localhost:2379"]
         imagePullPolicy: Always
         ports:
         - containerPort: 8443

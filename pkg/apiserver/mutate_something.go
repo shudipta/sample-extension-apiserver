@@ -23,10 +23,13 @@ func (a *SomethingMutaionHook) Resource() (plural schema.GroupVersionResource, s
 
 func (a *SomethingMutaionHook) Admit(
 	req *admissionv1beta1.AdmissionRequest) *admissionv1beta1.AdmissionResponse {
+	glog.Infoln("---------mutating...........")
 
 	mutatingObjectMeta := &NamedThing{}
 	err := json.Unmarshal(req.Object.Raw, mutatingObjectMeta)
 	if err != nil {
+		glog.Infoln("---------invalid obj...........")
+
 		return &admissionv1beta1.AdmissionResponse{
 			Allowed: false,
 			Result: &metav1.Status{
@@ -38,6 +41,8 @@ func (a *SomethingMutaionHook) Admit(
 
 	if req.Operation == admissionv1beta1.Create {
 		if _, ok := mutatingObjectMeta.Annotations["sample-label"]; !ok {
+			glog.Infoln("---------mutating the something obj...........")
+
 			patch := `[{"op": "add", "path": "/metadata/annotations/sample-label", "value": "true"}]`
 			return &admissionv1beta1.AdmissionResponse{
 				Allowed: true,

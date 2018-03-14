@@ -30,10 +30,13 @@ func (a *SomethingMutaionHook) ValidatingResource() (plural schema.GroupVersionR
 
 func (a *SomethingValidationHook) Validate(
 	req *admissionv1beta1.AdmissionRequest) *admissionv1beta1.AdmissionResponse {
+	glog.Infoln("------------validating...........")
 
 	validatingObjectMeta := &NamedThing{}
 	err := json.Unmarshal(req.Object.Raw, validatingObjectMeta)
 	if err != nil {
+		glog.Infoln("-----------invalid obj...........")
+
 		return &admissionv1beta1.AdmissionResponse{
 			Allowed: false,
 			Result: &metav1.Status{
@@ -44,7 +47,11 @@ func (a *SomethingValidationHook) Validate(
 	}
 
 	if req.Operation == admissionv1beta1.Create {
+		glog.Infoln("----------validating at creating time...........")
+
 		if len(validatingObjectMeta.Name) == 0 {
+			glog.Infoln("-----------name field is empty...........")
+
 			return &admissionv1beta1.AdmissionResponse{
 				Allowed: false,
 				Result: &metav1.Status{
@@ -56,6 +63,8 @@ func (a *SomethingValidationHook) Validate(
 
 		if validatingObjectMeta.Annotations == nil ||
 			validatingObjectMeta.Annotations["sample-label"] != "true" {
+			glog.Infof("----------%v has no annotations...........\n", validatingObjectMeta.Name)
+
 			return &admissionv1beta1.AdmissionResponse{
 				Allowed: false,
 				Result: &metav1.Status{
@@ -64,14 +73,16 @@ func (a *SomethingValidationHook) Validate(
 				},
 			}
 		}
-
-		a.lock.RLock()
-		defer a.lock.RUnlock()
+		//
+		//a.lock.RLock()
+		//defer a.lock.RUnlock()
 
 		obj, err := a.Client.SomethingcontrollerV1alpha1().
 			Somethings(validatingObjectMeta.Namespace).
 				Get(validatingObjectMeta.Name, metav1.GetOptions{})
 		if err == nil {
+			glog.Infof("---------%v already exists...........\n", obj.Name)
+
 			return &admissionv1beta1.AdmissionResponse{
 				Allowed: false,
 				Result: &metav1.Status{
@@ -81,21 +92,27 @@ func (a *SomethingValidationHook) Validate(
 			}
 		}
 	} else if req.Operation == admissionv1beta1.Delete {
+		glog.Infoln("----------validating at deleting time...........")
+
 		obj, err := a.Client.SomethingcontrollerV1alpha1().
 			Somethings(validatingObjectMeta.Namespace).
 			Get(validatingObjectMeta.Name, metav1.GetOptions{})
 		if err != nil {
+			glog.Infof("----------%v doesn't exist...........\n")
+
 			return &admissionv1beta1.AdmissionResponse{
 				Allowed: false,
 				Result: &metav1.Status{
 					Status: metav1.StatusFailure, Code: http.StatusBadRequest, Reason: metav1.StatusReasonBadRequest,
-					Message: fmt.Sprintf("%q is not exist", obj.Name),
+					Message: fmt.Sprintf("%q doesn't exist", obj.Name),
 				},
 			}
 		}
 
 		if obj.Annotations != nil &&
 			obj.Annotations["sample-label"] == "true" {
+			glog.Infof("----------annotations ([sample-label: true]) must be remmoved from %v...........\n", obj.Name)
+
 			return &admissionv1beta1.AdmissionResponse{
 				Allowed: false,
 				Result: &metav1.Status{

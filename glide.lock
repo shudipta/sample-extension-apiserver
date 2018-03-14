@@ -1,14 +1,10 @@
-hash: 2455de9aa9dec3469867a8a1aeea272814e57b96c1765a982918cd86d532c3a8
-updated: 2018-03-09T16:30:37.352684304+06:00
+hash: 6747394cbed58c97f160d7849395512962f02d825824f7b1b3384b5d150283e2
+updated: 2018-03-13T20:23:03.437457225+06:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
 - name: github.com/appscode/go
-  version: c312c0a1fe0d4988480073287b8633fc5a244647
-  subpackages:
-  - log/golog
-- name: github.com/appscode/kubed
-  version: 9181f66d1e666280e74cde67448ce1941d0eaba0
+  version: f8f2e1c7d2d10789cdd0540468b487d14421dbf9
   subpackages:
   - pkg/cmds
 - name: github.com/beorn7/perks
@@ -101,7 +97,7 @@ imports:
 - name: github.com/evanphx/json-patch
   version: 944e07253867aacae43c04b2e6a239005443f33a
 - name: github.com/ghodss/yaml
-  version: 0ca9ea5df5451ffdf184b4428c902747c2c11cd7
+  version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-openapi/jsonpointer
   version: 46af16f9f7b149af66e5d1bd010e3574dc06de98
 - name: github.com/go-openapi/jsonreference
@@ -210,9 +206,13 @@ imports:
 - name: github.com/spf13/cobra
   version: 7b2c5ac9fc04fc5efafb60700713d4fa609b777b
 - name: github.com/spf13/pflag
-  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
+  version: f4aa504bb62057ca90e8defc26e169353fd772d4
+  repo: https://github.com/appscode/pflag.git
+  vcs: git
 - name: github.com/spf13/viper
   version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
+  subpackages:
+  - kubernetes/fake
 - name: github.com/ugorji/go
   version: ded73eae5db7e7a0ef6f55aace87a2873c5d2b74
   subpackages:
@@ -220,12 +220,16 @@ imports:
 - name: golang.org/x/crypto
   version: 81e90905daefcd6fd217b62423c0908922eadb30
   subpackages:
+  - bcrypt
+  - blowfish
+  - nacl/secretbox
+  - poly1305
+  - salsa20/salsa
   - ssh/terminal
 - name: golang.org/x/net
   version: 1c05540f6879653db88113bc4a2b70aec4bd491f
   subpackages:
   - context
-  - context/ctxhttp
   - html
   - html/atom
   - http2
@@ -281,7 +285,7 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/api
-  version: 11147472b7c934c474a2c484af3c0c5210b7a3af
+  version: 9fc595375ab38f53cbc3a53026ac40fb44ad50ca
   subpackages:
   - admission/v1beta1
   - admissionregistration/v1alpha1
@@ -302,7 +306,6 @@ imports:
   - core/v1
   - events/v1beta1
   - extensions/v1beta1
-  - imagepolicy/v1alpha1
   - networking/v1
   - policy/v1beta1
   - rbac/v1
@@ -313,6 +316,13 @@ imports:
   - storage/v1
   - storage/v1alpha1
   - storage/v1beta1
+- name: k8s.io/apiextensions-apiserver
+  version: d0becfa6529e20309bd6684f8486abc265cf0b59
+  subpackages:
+  - pkg/apis/apiextensions
+  - pkg/apis/apiextensions/v1beta1
+  - pkg/client/clientset/clientset/scheme
+  - pkg/client/clientset/clientset/typed/apiextensions/v1beta1
 - name: k8s.io/apimachinery
   version: 180eddb345a5be3a157cea1c624700ad5bd27b8f
   subpackages:
@@ -320,15 +330,11 @@ imports:
   - pkg/api/errors
   - pkg/api/meta
   - pkg/api/resource
-  - pkg/api/testing
-  - pkg/api/testing/fuzzer
-  - pkg/api/testing/roundtrip
   - pkg/api/validation
   - pkg/api/validation/path
   - pkg/apimachinery
   - pkg/apimachinery/announced
   - pkg/apimachinery/registered
-  - pkg/apis/meta/fuzzer
   - pkg/apis/meta/internalversion
   - pkg/apis/meta/v1
   - pkg/apis/meta/v1/unstructured
@@ -354,14 +360,12 @@ imports:
   - pkg/util/errors
   - pkg/util/framer
   - pkg/util/httpstream
-  - pkg/util/httpstream/spdy
   - pkg/util/intstr
   - pkg/util/json
   - pkg/util/mergepatch
   - pkg/util/net
   - pkg/util/proxy
   - pkg/util/rand
-  - pkg/util/remotecommand
   - pkg/util/runtime
   - pkg/util/sets
   - pkg/util/strategicpatch
@@ -456,6 +460,7 @@ imports:
   - pkg/util/feature
   - pkg/util/flag
   - pkg/util/flushwriter
+  - pkg/util/logs
   - pkg/util/trace
   - pkg/util/webhook
   - pkg/util/wsstream
@@ -464,7 +469,7 @@ imports:
   - plugin/pkg/authenticator/token/webhook
   - plugin/pkg/authorizer/webhook
 - name: k8s.io/client-go
-  version: 78700dec6369ba22221b72770783300f143df150
+  version: 651d7a8818705e25181c672c1d71524a08e42bb0
   subpackages:
   - discovery
   - discovery/fake
@@ -509,64 +514,35 @@ imports:
   - informers/storage/v1alpha1
   - informers/storage/v1beta1
   - kubernetes
-  - kubernetes/fake
   - kubernetes/scheme
   - kubernetes/typed/admissionregistration/v1alpha1
-  - kubernetes/typed/admissionregistration/v1alpha1/fake
   - kubernetes/typed/admissionregistration/v1beta1
-  - kubernetes/typed/admissionregistration/v1beta1/fake
   - kubernetes/typed/apps/v1
-  - kubernetes/typed/apps/v1/fake
   - kubernetes/typed/apps/v1beta1
-  - kubernetes/typed/apps/v1beta1/fake
   - kubernetes/typed/apps/v1beta2
-  - kubernetes/typed/apps/v1beta2/fake
   - kubernetes/typed/authentication/v1
-  - kubernetes/typed/authentication/v1/fake
   - kubernetes/typed/authentication/v1beta1
-  - kubernetes/typed/authentication/v1beta1/fake
   - kubernetes/typed/authorization/v1
-  - kubernetes/typed/authorization/v1/fake
   - kubernetes/typed/authorization/v1beta1
-  - kubernetes/typed/authorization/v1beta1/fake
   - kubernetes/typed/autoscaling/v1
-  - kubernetes/typed/autoscaling/v1/fake
   - kubernetes/typed/autoscaling/v2beta1
-  - kubernetes/typed/autoscaling/v2beta1/fake
   - kubernetes/typed/batch/v1
-  - kubernetes/typed/batch/v1/fake
   - kubernetes/typed/batch/v1beta1
-  - kubernetes/typed/batch/v1beta1/fake
   - kubernetes/typed/batch/v2alpha1
-  - kubernetes/typed/batch/v2alpha1/fake
   - kubernetes/typed/certificates/v1beta1
-  - kubernetes/typed/certificates/v1beta1/fake
   - kubernetes/typed/core/v1
-  - kubernetes/typed/core/v1/fake
   - kubernetes/typed/events/v1beta1
-  - kubernetes/typed/events/v1beta1/fake
   - kubernetes/typed/extensions/v1beta1
-  - kubernetes/typed/extensions/v1beta1/fake
   - kubernetes/typed/networking/v1
-  - kubernetes/typed/networking/v1/fake
   - kubernetes/typed/policy/v1beta1
-  - kubernetes/typed/policy/v1beta1/fake
   - kubernetes/typed/rbac/v1
-  - kubernetes/typed/rbac/v1/fake
   - kubernetes/typed/rbac/v1alpha1
-  - kubernetes/typed/rbac/v1alpha1/fake
   - kubernetes/typed/rbac/v1beta1
-  - kubernetes/typed/rbac/v1beta1/fake
   - kubernetes/typed/scheduling/v1alpha1
-  - kubernetes/typed/scheduling/v1alpha1/fake
   - kubernetes/typed/settings/v1alpha1
-  - kubernetes/typed/settings/v1alpha1/fake
   - kubernetes/typed/storage/v1
-  - kubernetes/typed/storage/v1/fake
   - kubernetes/typed/storage/v1alpha1
-  - kubernetes/typed/storage/v1alpha1/fake
   - kubernetes/typed/storage/v1beta1
-  - kubernetes/typed/storage/v1beta1/fake
   - listers/admissionregistration/v1alpha1
   - listers/admissionregistration/v1beta1
   - listers/apps/v1
@@ -610,6 +586,9 @@ imports:
   - util/flowcontrol
   - util/homedir
   - util/integer
+  - util/workqueue
+- name: k8s.io/code-generator
+  version: dac22934f1bf35605309431df35132fc2811bc41
 - name: k8s.io/kube-openapi
   version: 39a7bf85c140f972372c2a0d1ee40adbf0c8bfe1
   subpackages:

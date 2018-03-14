@@ -2,8 +2,9 @@ apiVersion: somethingcontroller.kube-ac.com/v1alpha1
 kind: Something
 metadata:
   name: stn-demo
+#  namespace: kube-ac
   annotations:
-    sample-label: true
+#    sample-label: true
 spec:
   deploymentName: something-exmp
   replicas: 1

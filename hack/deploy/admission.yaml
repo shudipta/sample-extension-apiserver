@@ -9,7 +9,7 @@ webhooks:
       namespace: default
       name: kubernetes
       path: /apis/admission.somethingcontroller.kube-ac.com/v1alpha1/validations
-#    caBundle: ${KUBE_CA}
+    caBundle: ${KUBE_CA}
   rules:
   - operations:
     - CREATE
@@ -34,7 +34,7 @@ webhooks:
       namespace: default
       name: kubernetes
       path: /apis/admission.somethingcontroller.kube-ac.com/v1alpha1/mutations
-#    caBundle: ${KUBE_CA}
+    caBundle: ${KUBE_CA}
   rules:
   - operations:
     - CREATE

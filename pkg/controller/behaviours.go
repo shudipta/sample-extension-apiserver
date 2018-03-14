@@ -38,7 +38,7 @@ func (c *Controller) handleObject(obj interface{}) {
 		}
 		fmt.Println(" Recovered deleted object '%s' from tombstone\n", object.GetName())
 	}
-	fmt.Println("Processing object: %s\n", object.GetName())
+	fmt.Printf("Processing object: %s\n", object.GetName())
 	if ownerRef := metav1.GetControllerOf(object); ownerRef != nil {
 		// If this object is not owned by a Something, we should not do anything more
 		// with it.
@@ -149,7 +149,7 @@ func (c *Controller) somethingSyncHandler(key string) error {
 		runtime.HandleError(fmt.Errorf("invalid resource key: %s\n", key))
 		return nil
 	}
-	fmt.Printf("key -> %s, Namespace -> %s, name -> %s\n", key, namespace, name)
+	fmt.Printf("key: %s, Namespace: %s, name: %s\n", key, namespace, name)
 
 	// Get the Something resource with this namespace/name
 	something, err := c.somethingsLister.Somethings(namespace).Get(name)
@@ -185,7 +185,7 @@ func (c *Controller) somethingSyncHandler(key string) error {
 		runtime.HandleError(fmt.Errorf("%s: deployment name must be specified\n", key))
 		return nil
 	}
-	fmt.Printf("deployment Name -> %s\n", deploymentName)
+	fmt.Printf("deployment Name: %s\n", deploymentName)
 
 	// Get the deployment with the name specified in Something.spec
 	deployment, err := c.deploymentsLister.Deployments(something.Namespace).Get(deploymentName)

@@ -137,5 +137,6 @@ func NewController(
 		//},
 	})
 
+	fmt.Println("setting up handler completed")
 	return controller
 }

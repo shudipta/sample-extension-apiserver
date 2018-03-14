@@ -36,13 +36,13 @@ func NewCmdRun(out, errOut io.Writer, stopCh <-chan struct{}) *cobra.Command {
 		Short:             "Launch ksd server",
 		DisableAutoGenTag: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Println(">>>>>>>>>>>>> kubeconfigfile: \"", kubeconfig, "\"")
+			fmt.Println("kubeconfigfile: \"", kubeconfig, "\"")
 
-			stopCh := make(chan struct{})
-			defer close(stopCh)
+			ctlStopCh := make(chan struct{})
+			defer close(ctlStopCh)
 
 			cfg, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-			fmt.Println("======>")
+			//fmt.Println("======>")
 			if err != nil {
 				glog.Fatalf("Error building kubeconfig: %s", err.Error())
 			}
@@ -59,34 +59,35 @@ func NewCmdRun(out, errOut io.Writer, stopCh <-chan struct{}) *cobra.Command {
 			kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30)
 			exampleInformerFactory := informers.NewSharedInformerFactory(exampleClient, time.Second*30)
 
-			controller := controller.NewController(kubeClient, exampleClient, kubeInformerFactory, exampleInformerFactory)
-			//go controller.Run(2, stopCh)
+			c := controller.NewController(kubeClient, exampleClient, kubeInformerFactory, exampleInformerFactory)
+			//go c.Run(2, stopCh)
 
-			go kubeInformerFactory.Start(stopCh)
-			go exampleInformerFactory.Start(stopCh)
+			go kubeInformerFactory.Start(ctlStopCh)
+			go exampleInformerFactory.Start(ctlStopCh)
+			//fmt.Println("----> 01:")
 
 			go func() {
-				glog.Infoln("starting controller........")
-				if err = controller.Run(2, stopCh); err != nil {
-					glog.Fatalf("Error running controller: %s", err.Error())
+				glog.V(1).Infoln("starting controller........")
+				if err = c.Run(2, ctlStopCh); err != nil {
+					glog.Fatalf("Error running controller: %v", err)
 				}
 			}()
 
-
-
+			//fmt.Println("----> 02:")
 			if err := opt.Complete(); err != nil {
 				return err
 			}
 			if err := opt.Validate(args); err != nil {
 				return err
 			}
-			go func() error {
+			go func() {
 				glog.Infoln("starting apiserver........")
 				if err := opt.Run(stopCh, exampleClient); err != nil {
-					return err
+					glog.Fatalf("Error running apiserver: %v", err)
 				}
-				return  nil
 			}()
+
+			select {}
 
 			return nil
 		},

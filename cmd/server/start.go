@@ -46,7 +46,10 @@ func NewOptions(out, errOut io.Writer) *ServerOptions {
 		StdErr:             errOut,
 	}
 	//opt.RecommendedOptions.Etcd = nil
-	//opt.RecommendedOptions.SecureServing.BindPort = 8443
+	opt.RecommendedOptions.SecureServing.BindPort = 8443
+	opt.RecommendedOptions.SecureServing.ServerCert.CertKey.CertFile = "/etc/apiserver-crt/tls.crt"
+	opt.RecommendedOptions.SecureServing.ServerCert.CertKey.KeyFile = "/etc/apiserver-crt/tls.key"
+	opt.RecommendedOptions.Authentication.SkipInClusterLookup = true
 
 	return opt
 }
