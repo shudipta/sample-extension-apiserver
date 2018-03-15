@@ -39,3 +39,5 @@ apiserver.local.config/
 
 *.crt
 *.key
+main
+hack/server-image/sample-extension-apiserver
