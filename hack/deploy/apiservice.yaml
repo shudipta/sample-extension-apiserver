@@ -3,8 +3,8 @@ kind: APIService
 metadata:
   name: v1alpha1.admission.somethingcontroller.kube-ac.com
 spec:
-#  insecureSkipTLSVerify: true
-  caBundle: ${SERVICE_SERVING_CERT_CA}
+  insecureSkipTLSVerify: true
+#  caBundle: ${SERVICE_SERVING_CERT_CA}
   group: admission.somethingcontroller.kube-ac.com
   groupPriorityMinimum: 1000
   versionPriority: 15

@@ -21,7 +21,7 @@ import (
 	"github.com/golang/glog"
 	clientset "sample-extension-apiserver/client/clientset/versioned"
 	"time"
-	kubeinformers "k8s.io/client-go/informers"
+	//kubeinformers "k8s.io/client-go/informers"
 	informers "sample-extension-apiserver/client/informers/externalversions"
 	"sample-extension-apiserver/pkg/controller"
 	"fmt"
@@ -56,13 +56,13 @@ func NewCmdRun(out, errOut io.Writer, stopCh <-chan struct{}) *cobra.Command {
 				glog.Fatalf("Error building example clientset: %s", err.Error())
 			}
 
-			kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30)
+			//kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30)
 			exampleInformerFactory := informers.NewSharedInformerFactory(exampleClient, time.Second*30)
 
-			c := controller.NewController(kubeClient, exampleClient, kubeInformerFactory, exampleInformerFactory)
+			c := controller.NewController(kubeClient, exampleClient, exampleInformerFactory)
 			//go c.Run(2, stopCh)
 
-			go kubeInformerFactory.Start(ctlStopCh)
+			//go kubeInformerFactory.Start(ctlStopCh)
 			go exampleInformerFactory.Start(ctlStopCh)
 			//fmt.Println("----> 01:")
 
@@ -92,7 +92,7 @@ func NewCmdRun(out, errOut io.Writer, stopCh <-chan struct{}) *cobra.Command {
 			return nil
 		},
 	}
-	opt.AddFlags(cmd.Flags())
+	//opt.AddFlags(cmd.Flags())
 
 	return cmd
 }

@@ -76,7 +76,7 @@ func (c *Controller) Run(threadiness int, stopCh chan struct{}) error {
 
 	// wait for the caches to synchronize before starting the worker
 	fmt.Println("Waiting for informer caches to sync")
-	if !cache.WaitForCacheSync(stopCh, c.somethingsInformer.HasSynced, c.deploymentsInformer.HasSynced) {
+	if !cache.WaitForCacheSync(stopCh, c.somethingsInformer.HasSynced) {
 		fmt.Println("Timed out waiting for caches to sync")
 		return fmt.Errorf("Timed out waiting for caches to sync")
 	}
@@ -188,11 +188,11 @@ func (c *Controller) somethingSyncHandler(key string) error {
 	fmt.Printf("deployment Name: %s\n", deploymentName)
 
 	// Get the deployment with the name specified in Something.spec
-	deployment, err := c.deploymentsLister.Deployments(something.Namespace).Get(deploymentName)
+	//deployment, err := c.deploymentsLister.Deployments(something.Namespace).Get(deploymentName)
 	// If the resource doesn't exist, we'll create it
-	if errors.IsNotFound(err) {
-		deployment, err = c.kubeclientset.AppsV1beta2().Deployments(something.Namespace).Create(newDeployment(something))
-	}
+	//if errors.IsNotFound(err) {
+	//	deployment, err = c.kubeclientset.AppsV1beta2().Deployments(something.Namespace).Create(newDeployment(something))
+	//}
 
 	// If an error occurs during Get/Create, we'll requeue the item so we can
 	// attempt processing again later. This could have been caused by a
@@ -204,37 +204,37 @@ func (c *Controller) somethingSyncHandler(key string) error {
 
 	// If the Deployment is not controlled by this Something resource, we should log
 	// a warning to the event recorder and ret
-	if !metav1.IsControlledBy(deployment, something) {
-		msg := fmt.Sprintf("Resource %q already exists and is not managed by Something\n", deployment.Name)
-		//c.recorder.Event(Something, corev1.EventTypeWarning, ErrResourceExists, msg)
-		return fmt.Errorf(msg)
-	}
-	fmt.Println(deployment.Name, "is controlled by",something.Name)
+	//if !metav1.IsControlledBy(deployment, something) {
+	//	msg := fmt.Sprintf("Resource %q already exists and is not managed by Something\n", deployment.Name)
+	//	//c.recorder.Event(Something, corev1.EventTypeWarning, ErrResourceExists, msg)
+	//	return fmt.Errorf(msg)
+	//}
+	//fmt.Println(deployment.Name, "is controlled by",something.Name)
 
 	// If the number of the replicas on the Something resource is specified, and the
 	// number does not equal the current desired replicas on the Deployment, we
 	// should update the Deployment resource.
-	if something.Spec.Replicas != nil && *something.Spec.Replicas != *deployment.Spec.Replicas {
-		fmt.Println("SomethingR: %d, deployR: %d", *something.Spec.Replicas, *deployment.Spec.Replicas)
-		deployment, err = c.kubeclientset.AppsV1beta2().Deployments(something.Namespace).Update(newDeployment(something))
-	}
+	//if something.Spec.Replicas != nil && *something.Spec.Replicas != *deployment.Spec.Replicas {
+	//	fmt.Println("SomethingR: %d, deployR: %d", *something.Spec.Replicas, *deployment.Spec.Replicas)
+	//	deployment, err = c.kubeclientset.AppsV1beta2().Deployments(something.Namespace).Update(newDeployment(something))
+	//}
 
 	// If an error occurs during Update, we'll requeue the item so we can
 	// attempt processing again later. This could have been caused by a
 	// temporary network failure, or any other transient reason.
-	if err != nil {
-		fmt.Println("error occured in updating deployment", deployment.Name, "is", err)
-		return err
-	}
-	fmt.Println("no error in updating deployment", deployment.Name)
+	//if err != nil {
+	//	fmt.Println("error occured in updating deployment", deployment.Name, "is", err)
+	//	return err
+	//}
+	fmt.Println("no error in updating deployment", deploymentName)
 
 	// Finally, we update the status block of the Something resource to reflect the
 	// current state of the world
-	err = c.updateSomethingStatus(something, deployment)
-	if err != nil {
-		fmt.Println("error occured in updating status of something", something.Name, "is", err)
-		return err
-	}
+	//err = c.updateSomethingStatus(something, deployment)
+	//if err != nil {
+	//	fmt.Println("error occured in updating status of something", something.Name, "is", err)
+	//	return err
+	//}
 	fmt.Println(something.Name, "is updated")
 
 	//c.recorder.Event(foo, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)

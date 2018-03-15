@@ -8,15 +8,16 @@ REPO_ROOT="$GOPATH/src/$PACKAGE_NAME"
 #
 pushd $REPO_ROOT
 
-kubectl delete -f hack/deploy/crd.yaml -n kube-ac
+kubectl delete -f hack/deploy/crd.yaml
 
-kubectl delete -f hack/deploy/sa.yaml -n kube-ac
+kubectl delete -f hack/deploy/sa.yaml
 
 kubectl delete -f hack/deploy/clrb.yaml -n kube-system
 kubectl delete -f hack/deploy/rb.yaml -n kube-system
 
-kubectl delete -f hack/deploy/rc.yaml -n kube-ac
-kubectl delete -f hack/deploy/svc.yaml -n kube-ac
+kubectl delete -f hack/deploy/rc.yaml
+kubectl delete -f hack/deploy/svc.yaml
+kubectl delete -f hack/deploy/config.yaml
 
 kubectl delete -f hack/deploy/admission.yaml
 kubectl delete -f hack/deploy/apiservice.yaml

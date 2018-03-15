@@ -10,7 +10,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"k8s.io/client-go/rest"
-	"github.com/golang/glog"
+	"log"
 )
 
 type SomethingValidationHook struct {
@@ -19,7 +19,7 @@ type SomethingValidationHook struct {
 	lock        sync.RWMutex
 }
 
-func (a *SomethingMutaionHook) ValidatingResource() (plural schema.GroupVersionResource, singular string) {
+func (*SomethingValidationHook) ValidatingResource() (plural schema.GroupVersionResource, singular string) {
 	return schema.GroupVersionResource{
 		Group:    "admission.somethingcontroller.kube-ac.com",
 		Version:  "v1alpha1",
@@ -30,12 +30,12 @@ func (a *SomethingMutaionHook) ValidatingResource() (plural schema.GroupVersionR
 
 func (a *SomethingValidationHook) Validate(
 	req *admissionv1beta1.AdmissionRequest) *admissionv1beta1.AdmissionResponse {
-	glog.Infoln("------------validating...........")
+	log.Println("------------validating...........")
 
 	validatingObjectMeta := &NamedThing{}
 	err := json.Unmarshal(req.Object.Raw, validatingObjectMeta)
 	if err != nil {
-		glog.Infoln("-----------invalid obj...........")
+		log.Println("-----------invalid obj...........")
 
 		return &admissionv1beta1.AdmissionResponse{
 			Allowed: false,
@@ -47,10 +47,10 @@ func (a *SomethingValidationHook) Validate(
 	}
 
 	if req.Operation == admissionv1beta1.Create {
-		glog.Infoln("----------validating at creating time...........")
+		log.Println("----------validating at creating time...........")
 
 		if len(validatingObjectMeta.Name) == 0 {
-			glog.Infoln("-----------name field is empty...........")
+			log.Println("-----------name field is empty...........")
 
 			return &admissionv1beta1.AdmissionResponse{
 				Allowed: false,
@@ -63,7 +63,7 @@ func (a *SomethingValidationHook) Validate(
 
 		if validatingObjectMeta.Annotations == nil ||
 			validatingObjectMeta.Annotations["sample-label"] != "true" {
-			glog.Infof("----------%v has no annotations...........\n", validatingObjectMeta.Name)
+			log.Printf("----------%v has no annotations...........\n", validatingObjectMeta.Name)
 
 			return &admissionv1beta1.AdmissionResponse{
 				Allowed: false,
@@ -81,7 +81,7 @@ func (a *SomethingValidationHook) Validate(
 			Somethings(validatingObjectMeta.Namespace).
 				Get(validatingObjectMeta.Name, metav1.GetOptions{})
 		if err == nil {
-			glog.Infof("---------%v already exists...........\n", obj.Name)
+			log.Printf("---------%v already exists...........\n", obj.Name)
 
 			return &admissionv1beta1.AdmissionResponse{
 				Allowed: false,
@@ -92,13 +92,13 @@ func (a *SomethingValidationHook) Validate(
 			}
 		}
 	} else if req.Operation == admissionv1beta1.Delete {
-		glog.Infoln("----------validating at deleting time...........")
+		log.Println("----------validating at deleting time...........")
 
 		obj, err := a.Client.SomethingcontrollerV1alpha1().
 			Somethings(validatingObjectMeta.Namespace).
 			Get(validatingObjectMeta.Name, metav1.GetOptions{})
 		if err != nil {
-			glog.Infof("----------%v doesn't exist...........\n")
+			log.Printf("----------%v doesn't exist...........\n")
 
 			return &admissionv1beta1.AdmissionResponse{
 				Allowed: false,
@@ -111,7 +111,7 @@ func (a *SomethingValidationHook) Validate(
 
 		if obj.Annotations != nil &&
 			obj.Annotations["sample-label"] == "true" {
-			glog.Infof("----------annotations ([sample-label: true]) must be remmoved from %v...........\n", obj.Name)
+			log.Printf("----------annotations ([sample-label: true]) must be remmoved from %v...........\n", obj.Name)
 
 			return &admissionv1beta1.AdmissionResponse{
 				Allowed: false,
@@ -128,7 +128,7 @@ func (a *SomethingValidationHook) Validate(
 }
 
 func (*SomethingValidationHook) Initialize(kubeClientConfig *rest.Config, stopCh <-chan struct{}) error {
-	glog.Infoln("SomethingValidator: Initialize")
+	log.Println("SomethingValidator: Initialize")
 	return nil
 }
 

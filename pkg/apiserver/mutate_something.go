@@ -7,12 +7,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"k8s.io/client-go/rest"
-	"github.com/golang/glog"
+	"log"
 )
 
 type SomethingMutaionHook struct {}
 
-func (a *SomethingMutaionHook) Resource() (plural schema.GroupVersionResource, singular string) {
+func (*SomethingMutaionHook) MutatingResource() (plural schema.GroupVersionResource, singular string) {
 	return schema.GroupVersionResource{
 		Group:    "admission.somethingcontroller.kube-ac.com",
 		Version:  "v1alpha1",
@@ -21,14 +21,14 @@ func (a *SomethingMutaionHook) Resource() (plural schema.GroupVersionResource, s
 		"mutation"
 }
 
-func (a *SomethingMutaionHook) Admit(
+func (*SomethingMutaionHook) Admit(
 	req *admissionv1beta1.AdmissionRequest) *admissionv1beta1.AdmissionResponse {
-	glog.Infoln("---------mutating...........")
+	log.Println("---------mutating...........")
 
 	mutatingObjectMeta := &NamedThing{}
 	err := json.Unmarshal(req.Object.Raw, mutatingObjectMeta)
 	if err != nil {
-		glog.Infoln("---------invalid obj...........")
+		log.Println("---------invalid obj...........")
 
 		return &admissionv1beta1.AdmissionResponse{
 			Allowed: false,
@@ -41,7 +41,7 @@ func (a *SomethingMutaionHook) Admit(
 
 	if req.Operation == admissionv1beta1.Create {
 		if _, ok := mutatingObjectMeta.Annotations["sample-label"]; !ok {
-			glog.Infoln("---------mutating the something obj...........")
+			log.Println("---------mutating the something obj...........")
 
 			patch := `[{"op": "add", "path": "/metadata/annotations/sample-label", "value": "true"}]`
 			return &admissionv1beta1.AdmissionResponse{
@@ -54,7 +54,7 @@ func (a *SomethingMutaionHook) Admit(
 	return &admissionv1beta1.AdmissionResponse{Allowed: true}
 }
 
-func (a *SomethingMutaionHook) Initialize(config *rest.Config, stopCh <-chan struct{}) error {
-	glog.Infoln("SomethingValidator: Initialize")
+func (*SomethingMutaionHook) Initialize(config *rest.Config, stopCh <-chan struct{}) error {
+	log.Println("SomethingValidator: Initialize")
 	return nil
 }

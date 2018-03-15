@@ -2,7 +2,9 @@ package server
 
 import (
 	genericoptions "k8s.io/apiserver/pkg/server/options"
-	"sample-extension-apiserver/pkg/apiserver"
+	"github.com/openshift/generic-admission-server/pkg/apiserver"
+	ext_apiserver "sample-extension-apiserver/pkg/apiserver"
+	"log"
 	"io"
 	api "sample-extension-apiserver/apis/somethingcontroller/v1alpha1"
 	"fmt"
@@ -19,7 +21,6 @@ import (
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	//"time"
 	"github.com/spf13/pflag"
-	"github.com/golang/glog"
 	clientset "sample-extension-apiserver/client/clientset/versioned"
 )
 
@@ -45,11 +46,11 @@ func NewOptions(out, errOut io.Writer) *ServerOptions {
 		StdOut:             out,
 		StdErr:             errOut,
 	}
-	//opt.RecommendedOptions.Etcd = nil
+	opt.RecommendedOptions.Etcd = nil
 	opt.RecommendedOptions.SecureServing.BindPort = 8443
-	opt.RecommendedOptions.SecureServing.ServerCert.CertKey.CertFile = "/etc/apiserver-crt/tls.crt"
-	opt.RecommendedOptions.SecureServing.ServerCert.CertKey.KeyFile = "/etc/apiserver-crt/tls.key"
-	opt.RecommendedOptions.Authentication.SkipInClusterLookup = true
+	//opt.RecommendedOptions.SecureServing.ServerCert.CertKey.CertFile = "/etc/apiserver-crt/tls.crt"
+	//opt.RecommendedOptions.SecureServing.ServerCert.CertKey.KeyFile = "/etc/apiserver-crt/tls.key"
+	//opt.RecommendedOptions.Authentication.SkipInClusterLookup = true
 
 	return opt
 }
@@ -59,7 +60,7 @@ func (o *ServerOptions) AddFlags(fs *pflag.FlagSet) {
 	//o.OperatorOptions.AddFlags(fs)
 }
 
-func (o ServerOptions) Validate(args []string) error {
+func (o *ServerOptions) Validate(args []string) error {
 	errors := []error{}
 	errors = append(errors, o.RecommendedOptions.Validate()...)
 	return utilerrors.NewAggregate(errors)
@@ -79,14 +80,10 @@ func (o *ServerOptions) Config() (*apiserver.Config, error) {
 	}
 
 	serverConfig := genericapiserver.NewRecommendedConfig(apiserver.Codecs)
-	if err := o.RecommendedOptions.ApplyTo(serverConfig); err != nil {
+	if err := o.RecommendedOptions.ApplyTo(serverConfig, apiserver.Scheme); err != nil {
 		return nil, err
 	}
 
-	//operatorConfig := operator.NewOperatorConfig(serverConfig.ClientConfig)
-	//if err := o.OperatorOptions.ApplyTo(operatorConfig); err != nil {
-	//	return nil, err
-	//}
 
 	config := &apiserver.Config{
 		GenericConfig:  serverConfig,
@@ -94,15 +91,15 @@ func (o *ServerOptions) Config() (*apiserver.Config, error) {
 		ExtraConfig: apiserver.ExtraConfig{
 			//ClientConfig:   serverConfig.ClientConfig,
 			AdmissionHooks: []apiserver.AdmissionHook{
-				&apiserver.SomethingValidationHook{Client: o.SomethingClient},
-				&apiserver.SomethingMutaionHook{},
+				&ext_apiserver.SomethingValidationHook{Client: o.SomethingClient},
+				&ext_apiserver.SomethingMutaionHook{},
 			},
 		},
 	}
 	return config, nil
 }
 
-func (o ServerOptions) Run(stopCh <-chan struct{}, exampleClient clientset.Interface) error {
+func (o *ServerOptions) Run(stopCh <-chan struct{}, exampleClient clientset.Interface) error {
 	o.SomethingClient = exampleClient
 	config, err := o.Config()
 	if err != nil {
@@ -119,7 +116,7 @@ func (o ServerOptions) Run(stopCh <-chan struct{}, exampleClient clientset.Inter
 	//})
 
 	if err := s.GenericAPIServer.PrepareRun().Run(stopCh); err != nil {
-		glog.Fatal(err)
+		log.Fatal(err)
 	}
 
 	//return s.Run(stopCh)
