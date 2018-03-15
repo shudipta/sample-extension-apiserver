@@ -8,6 +8,8 @@ REPO_ROOT="$GOPATH/src/$PACKAGE_NAME"
 #
 pushd $REPO_ROOT
 
+rm -rf ./main ./hack/server-image/sample-extension-apiserver
+
 kubectl delete -f hack/deploy/crd.yaml
 
 kubectl delete -f hack/deploy/sa.yaml
